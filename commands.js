@@ -1,5 +1,6 @@
 
 const Promise = require('bluebird')
+const { Op } = require('sequelize')
 
 module.exports = ({
     bot,
@@ -9,18 +10,44 @@ module.exports = ({
         const user = await models.User.findOne({
             where: {
                 username: match[1]
-            }
+            },
+            include: [
+                models.Category,
+            ]
         })
-        return bot.sendMessage(msg.chat.id, user ? 'User has id ' + user.id : 'No user with that username lol')
+        return bot.sendMessage(msg.chat.id, user ? JSON.stringify(user.get()) : 'No user')
     })
 
-    bot.onText(/^\/add ([A-Za-z]+)/, async (msg, match) => {
-        const username = match[1]
+    bot.onText(/^\/add/, async (msg, match) => {
+        const parts = msg.text.split(' ')
 
-        const user = await models.User.create({
+        const [
+            cmd,
             username,
+            ...categories
+        ] = parts
+
+        const user = await models.User.findOne({
+            where: {
+                username,
+            }
         })
 
-        return bot.sendMessage(msg.chat.id, 'Added ' + user.id)
+        console.log('categories', categories)
+
+        await models.Category.findAll({
+            where: {
+                name: {
+                    [Op.in]: categories
+                }
+            }
+        }).map(category => {
+            return models.UserCategory.create({
+                user_id: user.id,
+                category_id: category.id,
+            })
+        })
+
+        return bot.sendMessage(msg.chat.id, 'Added to categories')
     })
 }
