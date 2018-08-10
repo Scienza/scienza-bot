@@ -35,20 +35,20 @@ module.exports = ({
         })
 
         if (!user) {
-            return bot.sendMessage(msg.chat.id, 'User not found!!!!!!!!!!')
+            return bot.sendMessage(msg.chat.id, 'Non sei registrato! Usa /registra per registrarti')
         }
 
         const data = [
             `Name: ${formatDisplayName(first_name, last_name)}`,
             `Username: ${formatUsername(username)}`,
-            `Categories: ${user.Categories.length ? user.Categories.map(cat => cat.title).join(' ') : 'None'}`,
-            `First seen: ${moment(user.created_at).toISOString()}`
+            `Categorie: ${user.Categories.length ? user.Categories.map(cat => cat.title).join(' ') : 'None'}`,
+            `Registrato il ${moment(user.created_at).toISOString()}`
         ].join('\n')
 
         return bot.sendMessage(msg.chat.id, data)
     })
 
-    bot.onText(/^\/subscribe\s+([a-z\s]+)$/i, async (msg, match) => {
+    bot.onText(/^\/iscrivi\s+([a-z\s]+)$/i, async (msg, match) => {
         const categories = match[1].split(' ')
 
         const {
@@ -60,7 +60,7 @@ module.exports = ({
         const response = []
 
         if (!categories.length) {
-            return bot.sendMessage(msg.chat.id, 'No categories specified')
+            return bot.sendMessage(msg.chat.id, 'Nessuna categoria specificata!')
         }
 
         const user = await models.User.findOne({
@@ -70,7 +70,7 @@ module.exports = ({
         })
 
         if (!user) {
-            return bot.sendMessage(msg.chat.id, 'User not found! Please introduce yourself with /register')
+            return bot.sendMessage(msg.chat.id, 'Non sei registrato! Usa /registra per registrarti')
         }
 
         const categoryInstances = await models.Category.findAll({
@@ -87,11 +87,11 @@ module.exports = ({
         }, [])
 
         if (notFoundCategories.length < categoryInstances.length) {
-            response.push('Added to categories: ' + categoryInstances.map(cat => cat.name).join(' '))
+            response.push('Aggiungo alle categorie: ' + categoryInstances.map(cat => cat.name).join(' '))
         }
 
         if (notFoundCategories.length) {
-            response.push('Categories not found: ' + notFoundCategories.join(' '))
+            response.push('Categorie non trovate: ' + notFoundCategories.join(' '))
         }
 
         console.log(categoryInstances.length, notFoundCategories.length)
@@ -108,7 +108,7 @@ module.exports = ({
         return bot.sendMessage(msg.chat.id, response.join('\n'))
     })
 
-    bot.onText(/^\/unsubscribe\s+([a-z\s]+)$/i, async (msg, match) => {
+    bot.onText(/^\/disiscrivi\s+([a-z\s]+)$/i, async (msg, match) => {
         const categories = match[1].split(' ')
 
         const {
@@ -120,7 +120,7 @@ module.exports = ({
         const response = []
 
         if (!categories.length) {
-            return bot.sendMessage(msg.chat.id, 'No categories specified')
+            return bot.sendMessage(msg.chat.id, 'Nessuna categoria specificata!')
         }
 
         const user = await models.User.findOne({
@@ -130,7 +130,7 @@ module.exports = ({
         })
 
         if (!user) {
-            return bot.sendMessage(msg.chat.id, 'User not found! Please introduce yourself with /nyaasu')
+            return bot.sendMessage(msg.chat.id, 'Non sei registrato! Usa /registra per registrarti')
         }
 
         const categoryInstances = await models.Category.findAll({
@@ -147,11 +147,11 @@ module.exports = ({
         }, [])
 
         if (notFoundCategories.length < categoryInstances.length) {
-            response.push('Unsubscribed from categories: ' + categoryInstances.map(cat => cat.name).join(' '))
+            response.push('Disiscritto da: ' + categoryInstances.map(cat => cat.name).join(' '))
         }
 
         if (notFoundCategories.length) {
-            response.push('Categories not found: ' + notFoundCategories.join(' '))
+            response.push('Categorie non trovate: ' + notFoundCategories.join(' '))
         }
 
         console.log(categoryInstances.length, notFoundCategories.length)
@@ -168,7 +168,7 @@ module.exports = ({
         return bot.sendMessage(msg.chat.id, response.join('\n'))
     })
 
-    bot.onText(/^\/category_define\s+([a-z]+)\s+([a-z]+)/i, async (msg, match) => {
+    bot.onText(/^\/aggiungi_categoria\s+([a-z]+)\s+([a-z]+)/i, async (msg, match) => {
         const [nyaasu, name, title] = match
 
         const category = await models.Category.findOne({
@@ -181,7 +181,7 @@ module.exports = ({
         })
 
         if (category) {
-            return bot.sendMessage(msg.chat.id, 'Category already exists!')
+            return bot.sendMessage(msg.chat.id, 'La categoria già esiste!')
         }
 
         await models.Category.create({
@@ -189,10 +189,10 @@ module.exports = ({
             title,
         })
 
-        return bot.sendMessage(msg.chat.id, `Category ${name} created!`)
+        return bot.sendMessage(msg.chat.id, `Categoria ${name} creata!`)
     })
 
-    bot.onText(/^\/register$/i, async msg => {
+    bot.onText(/^\/registra$/i, async msg => {
         const {
             from: {
                 id: telegram_id,
@@ -203,7 +203,7 @@ module.exports = ({
         } = msg
 
         if (!username) {
-            return bot.sendMessage(msg.chat.id, 'Please set an username first!')
+            return bot.sendMessage(msg.chat.id, 'Imposta un username per registrarti!')
         }
 
         const existingUser = await models.User.findOne({
@@ -213,7 +213,7 @@ module.exports = ({
         })
 
         if (existingUser) {
-            return bot.sendMessage(msg.chat.id, 'You already exist!')
+            return bot.sendMessage(msg.chat.id, 'Sei già iscritto!')
         }
 
         await models.User.create({
@@ -226,7 +226,7 @@ module.exports = ({
         return bot.sendMessage(msg.chat.id, 'Registrato! BUON GIORNISSIMO       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KAFFEEEEEEEeeëeéeè?????????????????????')
     })
 
-    bot.onText(/^\/invoke\s+([a-z]+)$/, async (msg, match) => {
+    bot.onText(/^\/chiama\s+([a-z]+)$/, async (msg, match) => {
         const categoryName = match[1]
 
         const category = await models.Category.findOne({
@@ -240,7 +240,7 @@ module.exports = ({
         })
 
         if (!category) {
-            return bot.sendMessage(msg.chat.id, `Category ${categoryName} does not exist!`)
+            return bot.sendMessage(msg.chat.id, `La categoria ${categoryName} non esiste!`)
         }
 
         const response = `${capitalise(category.title)}, a rapporto! ${category.Users.map(user => formatUsername(user.username)).sort().join(' ')}`
@@ -248,7 +248,7 @@ module.exports = ({
         return bot.sendMessage(msg.chat.id, response)
     })
 
-    bot.onText(/^\/category_list$/, async msg => {
+    bot.onText(/^\/categorie$/, async msg => {
         const categories = await models.Category.findAll()
 
         return bot.sendMessage(msg.chat.id, categories.map(category => category.name).join(' '))
