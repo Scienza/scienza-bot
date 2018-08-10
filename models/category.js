@@ -11,6 +11,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(128),
             allowNull: true,
         },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
+        title: {
+            type: DataTypes.STRING(128),
+            allowNull: true,
+        },
     })
 
     Category.associate = models => {
